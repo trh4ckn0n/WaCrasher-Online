@@ -1,26 +1,107 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>trhacknon | WhatsApp Crasher</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>trhacknon - WhatsApp Crasher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Share Tech Mono', monospace;
+      background-color: #0d0d0d;
+      color: #39ff14;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #39ff14;
+      text-shadow: 0 0 5px #39ff14;
+    }
+    input, button {
+      padding: 10px;
+      font-family: inherit;
+      margin: 5px;
+      border-radius: 8px;
+      border: none;
+    }
+    input {
+      background: #111;
+      color: #39ff14;
+      border: 1px solid #39ff14;
+      width: 300px;
+    }
+    button {
+      background: #111;
+      border: 1px solid #39ff14;
+      color: #39ff14;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button:hover {
+      background-color: #39ff14;
+      color: black;
+      box-shadow: 0 0 10px #39ff14;
+    }
+    .output {
+      margin-top: 20px;
+      white-space: pre-wrap;
+      text-align: center;
+    }
+    img {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>trhacknon | WhatsApp Crasher</h1>
-    <input type="text" id="phone" placeholder="Numéro (ex: 33612345678)" />
-    <input type="number" id="threads" placeholder="Nombre de threads" value="10" min="1" max="100"/>
-    <div class="btn-group">
-      <button onclick="send()">Crash</button>
-      <button onclick="shorten()">Raccourcir</button>
-      <button onclick="getQR()">QR Code</button>
-      <button onclick="copyLink()">Copier Lien</button>
-    </div>
-    <p id="status"></p>
-    <div id="result" class="output"></div>
-    <img id="qrimg" style="display:none; margin-top:20px; max-width:100%" />
+  <h1>trhacknon WhatsApp Crasher</h1>
+  <input type="text" id="phone" placeholder="Numéro WhatsApp (ex: 336xxxxxxxx)">
+  <input type="number" id="threads" placeholder="Threads (par défaut 10)" min="1">
+  <div>
+    <button onclick="sendMessage()">Générer et Attaquer</button>
+    <button onclick="generateShort()">Générer lien court</button>
+    <button onclick="generateQR()">QR Code</button>
   </div>
-  <script src="/static/script.js"></script>
+  <div class="output" id="output"></div>
+  <div id="qrContainer"></div>
+  
+  <script>
+    async function sendMessage() {
+      const phone = document.getElementById('phone').value;
+      const threads = document.getElementById('threads').value || 10;
+      const res = await fetch('/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, threads })
+      });
+      const data = await res.json();
+      document.getElementById('output').innerText = `Attaque lancée sur ${phone}\nLien: ${data.url}`;
+    }
+
+    async function generateShort() {
+      const phone = document.getElementById('phone').value;
+      const res = await fetch('/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      });
+      const data = await res.json();
+      document.getElementById('output').innerText = `Lien raccourci: ${data.short_url || data.error}`;
+    }
+
+    async function generateQR() {
+      const phone = document.getElementById('phone').value;
+      const res = await fetch('/qr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      });
+      const data = await res.json();
+      document.getElementById('output').innerText = `QR Code pour ${data.wa_url}`;
+      document.getElementById('qrContainer').innerHTML = `<img src='${data.qr}' alt='QR Code' />`;
+    }
+  </script>
 </body>
 </html>
