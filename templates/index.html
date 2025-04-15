@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>trhacknon | WhatsApp Crasher</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>trhacknon | WhatsApp Crasher</h1>
+    <input type="text" id="phone" placeholder="Numéro (ex: 33612345678)" />
+    <input type="number" id="threads" placeholder="Nombre de threads" value="10" min="1" max="100"/>
+    <div class="btn-group">
+      <button onclick="send()">Crash</button>
+      <button onclick="shorten()">Raccourcir</button>
+      <button onclick="getQR()">QR Code</button>
+      <button onclick="copyLink()">Copier Lien</button>
+    </div>
+    <p id="status"></p>
+    <div id="result" class="output"></div>
+    <img id="qrimg" style="display:none; margin-top:20px; max-width:100%" />
+  </div>
+  <script src="/static/script.js"></script>
+</body>
+</html>
