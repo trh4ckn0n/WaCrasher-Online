@@ -1,0 +1,4 @@
+flask
+requests[socks]
+qrcode
+pillow
