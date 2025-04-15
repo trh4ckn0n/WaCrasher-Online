@@ -131,19 +131,36 @@
       const data = await res.json();
       document.getElementById('output').innerText = `Lien raccourci: ${data.short_url || data.error}`;
     }
-
+    
     async function generateQR() {
-      const phone = document.getElementById('phone').value;
+      const phone = document.getElementById('phone').value.trim();
+    if (!phone) {
+      document.getElementById('output').innerText = "Erreur : Veuillez entrer un numéro de téléphone.";
+      return;
+    }
+ 
+    try {
       const res = await fetch('/qr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone })
       });
-      const data = await res.json();
-      document.getElementById('output').innerText = `QR Code pour ${data.wa_url}`;
-      document.getElementById('qrContainer').innerHTML = `<img src='${data.qr}' alt='QR Code' />`;
-    }
 
+      const data = await res.json();
+
+      if (data.error) {
+        document.getElementById('output').innerText = `Erreur : ${data.error}`;
+        document.getElementById('qrContainer').innerHTML = "";
+      } else {
+        document.getElementById('output').innerText = `QR Code pour ${data.wa_url}`;
+        document.getElementById('qrContainer').innerHTML = `<img src="${data.qr}" alt="QR Code" />`;
+      }
+    } catch (err) {
+      document.getElementById('output').innerText = `Erreur lors de la génération : ${err}`;
+      document.getElementById('qrContainer').innerHTML = "";
+    }
+  }
+    
     // Infos système + IP + heure
     async function loadSystemInfo() {
       const systemDiv = document.getElementById('systemInfo');
