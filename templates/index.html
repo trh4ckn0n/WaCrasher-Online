@@ -2,23 +2,41 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>trhacknon - WhatsApp Crasher</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Share Tech Mono', monospace;
-      background-color: #0d0d0d;
+      background: linear-gradient(160deg, #000000 0%, #0d0d0d 100%);
       color: #39ff14;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 30px;
+      overflow-x: hidden;
     }
     h1 {
       color: #39ff14;
-      text-shadow: 0 0 5px #39ff14;
+      text-shadow: 0 0 10px #39ff14;
+      animation: glow 2s infinite alternate;
+    }
+    @keyframes glow {
+      0% { text-shadow: 0 0 5px #39ff14; }
+      100% { text-shadow: 0 0 20px #00ffcc; }
+    }
+    .hud {
+      font-size: 0.9em;
+      color: #aaa;
+      background-color: rgba(0, 255, 0, 0.05);
+      border: 1px solid #39ff14;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 0 10px #39ff1477;
     }
     input, button {
       padding: 10px;
@@ -26,6 +44,7 @@
       margin: 5px;
       border-radius: 8px;
       border: none;
+      outline: none;
     }
     input {
       background: #111;
@@ -52,21 +71,39 @@
     }
     img {
       margin-top: 20px;
+      max-width: 200px;
+    }
+    .neon-border {
+      border: 2px dashed #39ff14;
+      padding: 15px;
+      margin-top: 20px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 5px #39ff14; }
+      100% { box-shadow: 0 0 20px #39ff14; }
     }
   </style>
 </head>
 <body>
   <h1>trhacknon WhatsApp Crasher</h1>
+
+  <div class="hud" id="systemInfo">
+    Chargement des infos système...
+  </div>
+
   <input type="text" id="phone" placeholder="Numéro WhatsApp (ex: 336xxxxxxxx)">
-  <input type="number" id="threads" placeholder="Threads (par défaut 10)" min="1">
+  <input type="number" id="threads" placeholder="Threads (défaut: 10)" min="1">
+
   <div>
     <button onclick="sendMessage()">Générer et Attaquer</button>
     <button onclick="generateShort()">Générer lien court</button>
     <button onclick="generateQR()">QR Code</button>
   </div>
-  <div class="output" id="output"></div>
+
+  <div class="output neon-border" id="output"></div>
   <div id="qrContainer"></div>
-  
+
   <script>
     async function sendMessage() {
       const phone = document.getElementById('phone').value;
@@ -102,6 +139,33 @@
       document.getElementById('output').innerText = `QR Code pour ${data.wa_url}`;
       document.getElementById('qrContainer').innerHTML = `<img src='${data.qr}' alt='QR Code' />`;
     }
+
+    // Infos système + IP + heure
+    async function loadSystemInfo() {
+      const systemDiv = document.getElementById('systemInfo');
+      let info = "";
+
+      const date = new Date();
+      info += `Date: ${date.toLocaleDateString()} - Heure: ${date.toLocaleTimeString()}\n`;
+
+      const ua = navigator.userAgent;
+      info += `Navigateur: ${ua}\n`;
+
+      const username = "Utilisateur local"; // Pas possible de récupérer en JS standard
+      info += `Nom d'utilisateur: ${username}\n`;
+
+      try {
+        const res = await fetch('https://ipapi.co/json');
+        const data = await res.json();
+        info += `IP: ${data.ip}\nVille: ${data.city}\nRégion: ${data.region}\nPays: ${data.country_name}\nFournisseur: ${data.org}`;
+      } catch {
+        info += "Erreur lors de la récupération de la géolocalisation/IP.";
+      }
+
+      systemDiv.innerText = info;
+    }
+
+    loadSystemInfo();
   </script>
 </body>
 </html>
