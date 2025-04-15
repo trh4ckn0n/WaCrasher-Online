@@ -64,27 +64,30 @@ def shorten():
     except Exception as e:
         return jsonify({"error": str(e)})
 
-# Route pour générer un QR code
 @app.route('/qr', methods=['POST'])
 def generate_qr():
     data = request.json
     phone = data.get('phone')
+    if not phone:
+        return jsonify({"error": "Numéro manquant"}), 400
+
     message = generate_massive_message()
     encoded = urllib.parse.quote(message)
     wa_url = f"https://wa.me/{phone}?text={encoded}"
 
-    # Création du QR code
-    qr = qrcode.QRCode(box_size=6, border=2)
-    qr.add_data(wa_url)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="lime", back_color="black")
+    try:
+        qr = qrcode.QRCode(box_size=6, border=2)
+        qr.add_data(wa_url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="lime", back_color="black")
 
-    # Conversion du QR code en image base64
-    buffered = BytesIO()
-    img.save(buffered, format="PNG")
-    img_str = b64encode(buffered.getvalue()).decode()
-    return jsonify({"qr": f"data:image/png;base64,{img_str}", "wa_url": wa_url})
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        img_str = b64encode(buffered.getvalue()).decode()
 
-# Lancer l'application Flask
+        return jsonify({"qr": f"data:image/png;base64,{img_str}", "wa_url": wa_url})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+        
 if __name__ == '__main__':
     app.run(debug=False, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
