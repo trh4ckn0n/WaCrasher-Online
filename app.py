@@ -46,7 +46,7 @@ def generate():
             time.sleep(0.8)
 
     threading.Thread(target=threaded_attack).start()  # Lancer l'attaque dans un thread séparé
-    preview = f"Message : trhacknon vous explose + spam visuel\nURL : {wa_url}"  # Aperçu du message
+    preview = f"Message : trhacknon vous explose + spam visuel\nURL : {wa_url}"
     return jsonify({"status": "sent", "url": wa_url, "preview": preview})
 
 # Route pour raccourcir le lien
@@ -68,49 +68,31 @@ def shorten():
 def generate_qr():
     data = request.json
     phone = data.get('phone')
-    if not phone:
-        return jsonify({"error": "Numéro manquant"}), 400
-
     message = generate_massive_message()
-    encoded = urllib.parse.quote(message)
-    wa_url = f"https://wa.me/{phone}?text={encoded}"
+    encoded_message = urllib.parse.quote(message)
+    wa_url = f"https://wa.me/{phone}?text={encoded_message}"
 
-    try:
-        qr = qrcode.QRCode(box_size=6, border=2)
-        qr.add_data(wa_url)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="lime", back_color="black")
+    # Tronquer l'URL si elle est trop longue
+    max_length = 2000  # Longueur maximale recommandée pour un QR code
+    if len(wa_url) > max_length:
+        wa_url = wa_url[:max_length]
 
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        img_str = b64encode(buffered.getvalue()).decode()
+    # Création du QR code
+    qr = qrcode.QRCode(
+        version=None,  # Laisser la bibliothèque déterminer la version appropriée
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=6,
+        border=2
+    )
+    qr.add_data(wa_url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="lime", back_color="black")
 
-        return jsonify({"qrdef generate_qr():
-    data = request.json
-    phone = data.get('phone')
-    if not phone:
-        return jsonify({"error": "Numéro manquant"}), 400
+    # Conversion du QR code en image base64
+    buffered = BytesIO()
+    img.save(buffered, format="PNG")
+    img_str = b64encode(buffered.getvalue()).decode()
+    return jsonify({"qr": f"data:image/png;base64,{img_str}", "wa_url": wa_url})
 
-    message = generate_massive_message()
-    encoded = urllib.parse.quote(message)
-    wa_url = f"https://wa.me/{phone}?text={encoded}"
-
-    try:
-        qr = qrcode.QRCode(box_size=6, border=2)
-        qr.add_data(wa_url)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="lime", back_color="black")
-
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        img_str = b64encode(buffered.getvalue()).decode()
-
-        return jsonify({"qr": f"data:image/png;base64,{img_str}", "wa_url": wa_url})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-        ": f"data:image/png;base64,{img_str}", "wa_url": wa_url})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-        
 if __name__ == '__main__':
     app.run(debug=False, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
