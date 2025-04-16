@@ -85,7 +85,30 @@ def generate_qr():
         img.save(buffered, format="PNG")
         img_str = b64encode(buffered.getvalue()).decode()
 
+        return jsonify({"qrdef generate_qr():
+    data = request.json
+    phone = data.get('phone')
+    if not phone:
+        return jsonify({"error": "Numéro manquant"}), 400
+
+    message = generate_massive_message()
+    encoded = urllib.parse.quote(message)
+    wa_url = f"https://wa.me/{phone}?text={encoded}"
+
+    try:
+        qr = qrcode.QRCode(box_size=6, border=2)
+        qr.add_data(wa_url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="lime", back_color="black")
+
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        img_str = b64encode(buffered.getvalue()).decode()
+
         return jsonify({"qr": f"data:image/png;base64,{img_str}", "wa_url": wa_url})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+        ": f"data:image/png;base64,{img_str}", "wa_url": wa_url})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
         
